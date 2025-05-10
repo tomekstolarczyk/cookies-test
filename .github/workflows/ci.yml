@@ -36,7 +36,7 @@ jobs:
 
         ### uruchom testy dla wybranej przegladrki ###
       - name: Run tests on ${{ matrix.browser }}
-        run: pytest -q tests/zgoda_na_cookies_multi_browser.py
+        run: pytest -q tests/zgoda_na_cookies.py
         ### przekazujemy browser jako zmienna srodowiskowa ###
         env:
           BROWSER: ${{ matrix.browser }}
