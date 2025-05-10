@@ -27,6 +27,9 @@ def test_accept_analytics_cookie():
         ### Akceptujemy zaznaczone ###
         page.click("button:has-text('Zaakceptuj zaznaczone')")
 
+        ###  Dajemy chwilę, żeby baner zanikał i cookies się zapisały ### 
+        page.wait_for_timeout(1000)
+
         ### Pobieramy cookies ###
         cookies = context.cookies()
         names = {c["name"] for c in cookies}
