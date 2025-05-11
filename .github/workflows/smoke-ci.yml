@@ -1,12 +1,17 @@
-name: Smoke CI
+name: CI
 
 on:
   push:
     branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
-  install-check:
+  test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        browser: [chromium, firefox, webkit]
 
     steps:
       # 1. Ściągamy kod
@@ -23,16 +28,16 @@ jobs:
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install greenlet>=3.0.3 playwright==1.52.0 pytest==8.3.5
+          pip install "greenlet>=3.0.3" "playwright==1.52.0" "pytest==8.3.5"
 
       # 4. Instalujemy przeglądarki i biblioteki systemowe
       - name: Install Playwright browsers and deps
-        run: |
-          # zalecane: npx playwright install --with-deps
-          npx playwright install --with-deps
+        run: npx playwright install --with-deps
 
-      # 5. Wypisujemy zawartość cache, żeby upewnić się, że mamy chromium/firefox/webkit
-      - name: List installed browsers
-        run: |
-          echo "→ ~/.cache/ms-playwright:"
-          ls -R ~/.cache/ms-playwright || echo "  (brak katalogu!)"
+      # 5. Ustawiamy zmienną środowiskową BROWSER
+      - name: Set BROWSER env
+        run: echo "BROWSER=${{ matrix.browser }}" >> $GITHUB_ENV
+
+      # 6. Odpalamy testy
+      - name: Run tests on ${{ matrix.browser }}
+        run: pytest -q tests/zgoda_na_cookies.py
