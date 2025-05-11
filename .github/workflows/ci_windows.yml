@@ -1,5 +1,4 @@
-# .github/workflows/ci.yml
-name: Playwright CI (Python)
+name: CI on Windows
 
 on:
   push:
@@ -8,32 +7,31 @@ on:
     branches: [ main ]
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
+  test-windows:
+    runs-on: windows-latest
     strategy:
       matrix:
         browser: [chromium, firefox, webkit]
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      - name: Setup Python 3.12
+      - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.12'
 
-      # TU zamiast ręcznego pip + npx używamy gotowej akcji:
-      - name: Setup Playwright (browsers + deps)
-        uses: microsoft/playwright-github-action@v1
-        with:
-          python: true         # zainstaluje python-playwright
-          install-deps: true   # apt-get install -y gtk gstreamer itp.
-          browsers: all        # chromium, firefox, webkit
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install "greenlet>=3.0.3" "playwright==1.52.0" "pytest==8.3.5"
 
-      - name: Install test deps
-        run: pip install pytest
+      - name: Install Playwright browsers
+        run: python -m playwright install
 
-      - name: Run test on ${{ matrix.browser }}
-        env:
-          BROWSER: ${{ matrix.browser }}
+      - name: Set BROWSER env
+        run: echo "BROWSER=${{ matrix.browser }}" >> $Env:GITHUB_ENV
+
+      - name: Run tests on ${{ matrix.browser }}
         run: pytest -q tests/zgoda_na_cookies.py
