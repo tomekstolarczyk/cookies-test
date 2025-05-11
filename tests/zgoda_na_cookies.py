@@ -19,8 +19,8 @@ def test_accept_analytics_cookie():
         page.goto("https://www.ing.pl", timeout=60000)
 
         ### otwieramy panel cookies ###
-        page.wait_for_selector("button.js-cookie-policy-main-settings-button", timeout=60000)
-        page.click("button.js-cookie-policy-main-settings-button")
+        page.wait_for_selector("button:has-text('Dostosuj')", timeout=60000)
+        page.click("button:has-text('Dostosuj')")
 
         ### Akceptujemy analityczne ###
         page.wait_for_selector("div.js-checkbox[name='CpmAnalyticalOption']", timeout=60000)
