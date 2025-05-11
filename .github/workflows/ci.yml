@@ -1,36 +1,52 @@
+### GitHub Actions workflow: CI on Windows ###
 name: CI on Windows
 
+### workflow uruchamiamy na wszelkie pushe oraz pull requesty do galezi main
 on:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
 
+### definiujemy zadania ###
 jobs:
+
   cookie-test:
+
+    ### ustawiamy runnera na windows ### 
     runs-on: windows-latest
+
+    ### test bedziemy wykonywac jednoczesnie na trzech przeglądarkach ###
     strategy:
       matrix:
         browser: [chromium, firefox, webkit]
 
     steps:
+
+      ### 1) pobieramy kod z repozytorium ###
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      ### 2) konfigurujemy pythona w wersji 3.12 ###
       - name: Setup Python 3.12
         uses: actions/setup-python@v4
         with:
           python-version: '3.12'
 
+      ### 3) instalujemy potrzebne zaleznosci: pip, pytest, playwright ###
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install pytest playwright
 
+      ### 4) pobieramy binarki przegladarek dla Playwright ###
       - name: Install Playwright browsers
         run: python -m playwright install
 
+      ### 5) uruchamiamy test dla kazdej przegladarki z macierzy ###
       - name: Run zgoda_na_cookies_for_automation.py on ${{ matrix.browser }}
+        # przekazujemy zmienną środowiskową, która określa przeglądarkę do testu #
         env:
           BROWSER: ${{ matrix.browser }}
+        # Wywołujemy pytest dla konkretnego pliku testowego #
         run: pytest -q tests/zgoda_na_cookies_for_automation.py
