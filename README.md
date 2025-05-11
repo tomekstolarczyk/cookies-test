@@ -11,7 +11,7 @@ Ten projekt zawiera zestaw testów automatyzujących akceptację ciasteczek anal
 * `zgoda_na_cookies_single_browser.py` – test uruchamiany lokalnie dla jednej przeglądarki (domyślnie Chromium).
 * `zgoda_na_cookies_multi_browser.py` – test uruchamiany lokalnie kolejno dla trzech przeglądarek (Chromium, Firefox, WebKit) z wykorzystaniem `@pytest.mark.parametrize`.
 * `zgoda_na_cookies_for_automation.py` – test dedykowany pod CI/CD (odczyt zmiennej środowiskowej `BROWSER`).
-* `.github/workflows/ci.yml` – GitHub Actions workflow, który ma uruchamiać `zgoda_na_cookies_for_automation.py` w macierzy przeglądarek na Windows.
+* `.github/workflows/ci.yml` – GitHub Actions workflow, który ma automatycznie uruchamiać `zgoda_na_cookies_for_automation.py` dla kilku przeglądarek jednocześnie przy każdym push/pull request na maina
 
 ---
 
@@ -26,7 +26,8 @@ cookies-test/
 │   ├── zgoda_na_cookies_multi_browser.py
 │   └── zgoda_na_cookies_for_automation.py
 ├── requirements.txt
-└── README.md
+├── README.md
+└── .gitignore
 ```
 
 ---
