@@ -1,44 +1,44 @@
 import os
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, TimeoutError
 
-### ciasteczka, po których bedziemy weryfikować ###
 EXPECTED = {"cookiePolicyGDPR", "cookiePolicyGDPR__details", "cookiePolicyINCPS"}
 
-
 def test_accept_analytics_cookie():
-    # Odczytujemy nazwe przegladarki z zmiennej srodowiskowej
     browser_name = os.getenv("BROWSER", "chromium")
-
     with sync_playwright() as p:
-        # Uruchamiamy wybrana przegladarke w trybie headless
         browser = getattr(p, browser_name).launch(headless=True)
-        context = browser.new_context()
+        # wymuś polski, żeby banner był po polsku
+        context = browser.new_context(locale="pl-PL")
         page = context.new_page()
 
-        # Przechodzimy na strone ING
-        page.goto("https://www.ing.pl", timeout=60000)
+        # 1) Wejdź i poczekaj na sieć
+        page.goto("https://www.ing.pl")
+        page.wait_for_load_state("networkidle", timeout=60000)
 
-        # 1. Otwórz panel ciasteczek używając selektora klasy
-        page.wait_for_selector("button.js-cookie-policy-main-settings-button", timeout=60000)
-        page.click("button.js-cookie-policy-main-settings-button")
+        # 2) Otwórz panel ciastek
+        settings_btn = page.locator("button.js-cookie-policy-main-settings-button")
+        settings_btn.wait_for(state="visible", timeout=90000)
+        settings_btn.click(timeout=90000)
 
-        # 2. Zaznacz opcję analitycznych po selektorze klasy i atrybucie name
-        page.wait_for_selector(".js-checkbox[name='CpmAnalyticalOption']", timeout=60000)
-        page.click(".js-checkbox[name='CpmAnalyticalOption']")
+        # 3) Zaznacz analityczne
+        analytics_chk = page.locator("div.js-checkbox[name='CpmAnalyticalOption']")
+        analytics_chk.wait_for(state="visible", timeout=60000)
+        analytics_chk.click()
 
-        # 3. Kliknij "Zaakceptuj zaznaczone" - tu pozostawiamy tekst bo nie ma klasy
-        page.wait_for_selector("button:has-text('Zaakceptuj zaznaczone')", timeout=60000)
-        page.click("button:has-text('Zaakceptuj zaznaczone')")
+        # 4) Zaakceptuj
+        accept_btn = page.locator("button:has-text('Zaakceptuj zaznaczone')")
+        try:
+            accept_btn.wait_for(state="visible", timeout=30000)
+            accept_btn.click()
+        except TimeoutError:
+            # fallback na angielski, gdyby nie było polskiego
+            page.click("button:has-text('Accept selected')", timeout=30000)
 
-        # 4. Dajemy chwilę na zapis ciastek
-        page.wait_for_timeout(1000)
+        # 5) Poczekaj na zapis ciastek
+        page.wait_for_timeout(2000)
 
-        # 5. Pobierz ciasteczka i weryfikuj obecność
-        cookies = context.cookies()
-        names = {c['name'] for c in cookies}
-        assert EXPECTED & names, (
-            f"Nie znaleziono żadnego z expected cookies {EXPECTED!r}, mamy tylko {names!r}"
-        )
+        # 6) Sprawdź cookie
+        names = {c["name"] for c in context.cookies()}
+        assert EXPECTED & names, f"Brak expected ciastek, mamy tylko {names!r}"
 
-        # Zamknij sesję przeglądarki
         browser.close()
