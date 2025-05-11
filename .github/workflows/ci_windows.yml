@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  test-windows:
+  cookie-test:
     runs-on: windows-latest
     strategy:
       matrix:
@@ -17,21 +17,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup Python
+      - name: Setup Python 3.12
         uses: actions/setup-python@v4
         with:
           python-version: '3.12'
 
-      - name: Install Python dependencies
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install "greenlet>=3.0.3" "playwright==1.52.0" "pytest==8.3.5"
+          pip install pytest playwright
 
       - name: Install Playwright browsers
         run: python -m playwright install
 
-      - name: Set BROWSER env
-        run: echo "BROWSER=${{ matrix.browser }}" >> $Env:GITHUB_ENV
-
-      - name: Run tests on ${{ matrix.browser }}
-        run: pytest -q tests/zgoda_na_cookies.py
+      - name: Run zgoda_na_cookies_for_automation.py on ${{ matrix.browser }}
+        env:
+          BROWSER: ${{ matrix.browser }}
+        run: pytest -q zgoda_na_cookies_for_automation.py

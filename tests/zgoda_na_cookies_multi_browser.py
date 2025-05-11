@@ -1,41 +1,37 @@
-"""
-Ten sam test co poprzednio, ale uruchomiony trzykrotnie dla:
-- chromium
-- firefox
-- webkit
-"""
-
-import pytest
 from playwright.sync_api import sync_playwright
+import pytest
 
-### ciasteczka, po których bedziemy weryfikować ###
-EXPECTED = {"cookiePolicyGDPR", "cookiePolicyGDPR__details", "cookiePolicyINCPS"}
+# Oczekiwana wartość maski ciasteczka cookiePolicyGDPR po akceptacji analitycznych
+EXPECTED_MASK = "3"
 
 @pytest.mark.parametrize("browser_name", ["chromium", "firefox", "webkit"])
-def test_accept_analytics_cookie_multi(browser_name):
-
-
+def test_accept_analytics_cookie_mask(browser_name):
     with sync_playwright() as p:
-        ### uruchamiamy wybrana przegladarke headless ###
+        # Uruchamiamy wskazaną przeglądarkę w trybie headless
         browser = getattr(p, browser_name).launch(headless=True)
         context = browser.new_context()
         page = context.new_page()
 
-        ### wchodzimy na ing ###
+        # Wejdź na stronę ING
         page.goto("https://www.ing.pl", timeout=60000)
 
-        ### otwieramy panel cookies ###
+        # Otwórz panel ciasteczek
         page.click("button.js-cookie-policy-main-settings-button")
 
-        ### Akceptujemy analityczne ###
+        # Zaznacz opcję analitycznych
         page.click("div.js-checkbox[name='CpmAnalyticalOption']")
 
-        ### Akceptujemy zaznaczone ###
+        # Zaakceptuj zaznaczone
         page.click("button:has-text('Zaakceptuj zaznaczone')")
 
-        ### Asercja: co najmniej jedno z oczekiwanych ciastek jest w zestawie ###
-        names = {c["name"] for c in context.cookies()}
-        assert EXPECTED & names, f"Brak oczekiwanego cookie w: {names}"
+        # Poczekaj krótko na zapis ciasteczek
+        page.wait_for_timeout(1000)
 
-        ### zamykamy sesje ###
+        # Znajdź ciasteczko cookiePolicyGDPR i sprawdź jego wartość
+        mask_cookie = next(c for c in context.cookies() if c["name"] == "cookiePolicyGDPR")
+        assert mask_cookie["value"] == EXPECTED_MASK, (
+            f"Oczekiwana maska '{EXPECTED_MASK}', ale mamy '{mask_cookie['value']}'"
+        )
+
+        # Zamknij przeglądarkę
         browser.close()
