@@ -33,4 +33,4 @@ jobs:
       - name: Run zgoda_na_cookies_for_automation.py on ${{ matrix.browser }}
         env:
           BROWSER: ${{ matrix.browser }}
-        run: pytest -q zgoda_na_cookies_for_automation.py
+        run: pytest -q tests/zgoda_na_cookies_for_automation.py
