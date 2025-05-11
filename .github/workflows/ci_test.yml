@@ -1,23 +1,16 @@
-# .github/workflows/ci-smoke.yml
 name: Smoke CI
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
   smoke:
     runs-on: ubuntu-latest
-
     steps:
-      # checkout kodu
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      # proste sprawdzenie zmiennej środowiskowej
-      - name: Print BROWSER
-        run: echo "BROWSER is set to: ${{ env.BROWSER }}"
-
-      # prosty zwrot wyjścia
       - name: Smoke test
-        run: |
-          echo "CI działa poprawnie!"
+        run: echo "CI działa poprawnie!"
