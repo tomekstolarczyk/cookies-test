@@ -17,7 +17,7 @@ import pytest
 def test_accept_analytics_cookie_mask(browser_name):
     with sync_playwright() as p:
 
-        ### uruchamiamy odpowiednią przeglądarke w trybie headless ###
+        ### uruchamiamy wskazana przeglądarke w trybie headless ###
         browser = getattr(p, browser_name).launch(headless=True)
 
         ### tworzymy nowy, czysty kontekst – izolowana sesja, nowe ciasteczka ###
