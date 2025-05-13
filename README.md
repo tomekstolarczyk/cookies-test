@@ -51,12 +51,24 @@ cookies-test/
    git clone https://github.com/tomekstolarczyk/cookies-test.git
    cd cookies-test
    ```
-2. **Utwórz i aktywuj wirtualne środowisko (bash)**
+2. **Utwórz i aktywuj wirtualne środowisko**
 
    ```bash
    python -m venv .venv
-   source .venv/bin/activate
    ```
+
+   * **bash (Linux/macOS)**
+
+     ```bash
+     source .venv/bin/activate
+     ```
+
+   * **Git Bash (Windows)**
+
+     ```bash
+     source .venv/Scripts/activate
+     ```
+
 3. **Zainstaluj zależności**
 
    ```bash
